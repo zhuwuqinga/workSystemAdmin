@@ -11,7 +11,7 @@
                   <Option value="type1">类型1</Option>
                   <Option value="type2">类型2</Option>
                   <Option value="type3">类型3</Option>
-              </Select>
+                </Select>
               </Form-item>
             </Col>
             <Col span="8">
@@ -80,7 +80,7 @@ export default {
               h('Button', {
                 on: {
                   click: () => {
-                    this.show(params.index)
+                    this.show(params)
                   }
                 }
               }, '详情'),
@@ -88,7 +88,7 @@ export default {
                 class: 'ml10',
                 on: {
                   click: () => {
-                    this.remove(params.index)
+                    this.remove(params)
                   }
                 }
               }, '删除')
@@ -123,11 +123,11 @@ export default {
   methods: {
     handleSearch () {},
     handleReset () {},
-    show (index) {
-      console.log('详情', index)
+    show (params) {
+      console.log('详情', params)
     },
-    remove (index) {
-      console.log('删除', index)
+    remove (params) {
+      console.log('删除', params)
     }
   }
 }
