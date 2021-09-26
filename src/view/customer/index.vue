@@ -23,26 +23,34 @@
           <div>
             <Button @click="handleAdd" type="primary" icon="ios-add">新增</Button>
             <Button @click="handleDel" type="default" class="ml10">删除</Button>
-            <Button @click="handleExport" type="warning" icon="ios-cloud-download-outline" class="ml10">导出</Button>
+            <!-- <Button @click="handleExport" type="warning" icon="ios-cloud-download-outline" class="ml10">导出</Button> -->
           </div>
           <Table border :width="'100%'" :columns="columns" :data="tableData" class="mt10" @on-selection-change="selection"></Table>
           <Page :total="total" :current="searchParam.pageNum" :page-size="searchParam.pageSize" @on-change="pageChange" show-sizer show-elevator show-total></Page>
         </Card>
       </div>
-      <Modal
-        :title="modal.title"
-        v-model="modal.visible"
-        :confirm-loading="modal.confirmLoading"
-        @on-ok="handleOk"
-        @on-cancel="handleCancel"
-      >
-        <EditForm />
-      </Modal>
+      <div v-if="modal.visible">
+        <Modal
+          :title="modal.title"
+          v-model="modal.visible"
+          :width="800"
+          :mask-closable="false"
+        >
+          <div slot="footer">
+            <Button type="default" @click="handleCancel">关闭</Button>
+            <span style="margin-left: 10px;" v-if="modal.status !== 3">
+              <Button v-if="modal.title === '新增'" type="primary" :loading="modal.confirmLoading" @click="addClick">确定</Button>
+              <Button v-else type="primary" :loading="modal.confirmLoading" @click="editClick">确定</Button>
+            </span>
+          </div>
+          <EditForm ref='form' :parentCompanyList="parentCompanyList" :formData="formData" :status="modal.status"/>
+        </Modal>
+      </div>
     </div>
   </div>
 </template>
 <script>
-import { getCustormList } from '@/api/custorm.js'
+import { getCustormList, addCustorm, editCustorm, removeCustorm } from '@/api/custorm.js'
 import EditForm from './modules/editForm'
 export default {
   components: {
@@ -60,7 +68,8 @@ export default {
       modal: {
         title: '新增',
         visible: false,
-        confirmLoading: false
+        confirmLoading: false,
+        status: 1
       },
       total: 0,
       columns: [
@@ -153,11 +162,40 @@ export default {
         }
       ],
       tableData: [],
-      ids: []
+      parentCompanyList: [],
+      ids: [],
+      formData: {
+        parentId: '', // 上级公司
+        companyName: '', // 公司名称
+        companyType: '', // 公司类型
+        legalPerson: '', // 法人
+        province: '', // 公司地区 -- 省
+        city: '', // 公司地区 -- 市
+        area: '', // 公司地区 -- 区县
+        companyAddress: '', // 公司详细地址
+        province1: '', // 社保规则地区 -- 省
+        city1: '', // 社保规则地区 -- 市
+        area1: '', // 社保规则地区 -- 区县
+        socialNO: '', // 社保规则
+        province2: '', // 公积金规则地区 -- 省
+        city2: '', // 公积金规则地区 -- 市
+        area2: '', // 公积金规则地区 -- 区县
+        publicFundNO: '', // 公积金规则
+        expiryDateType: '', // 有效期限
+        expiryDate: '', // 有效期限时间
+        netpNo: '', // 社会信用代码
+        industry: '', // 所属行业
+        billBankno: '', // 对公帐号
+        billBankaddr: '', // 开户行
+        mobile: '', // 联系电话
+        saleNames: '' // 销售人员
+      },
+      companyId: ''
     }
   },
   mounted () {
     this.loadList()
+    this.loadAllList()
   },
   methods: {
     // 加载数据
@@ -178,6 +216,16 @@ export default {
         }
       })
     },
+    // 加载所有公司
+    loadAllList () {
+      getCustormList().then(res => {
+        if (res.data.code === 0) {
+          this.parentCompanyList = res.data.rows
+        } else {
+          this.$Message.error(res.data.msg)
+        }
+      })
+    },
     // 页面改变
     pageChange (e) {
       this.searchParam.pageNum = e
@@ -193,33 +241,110 @@ export default {
       this.loadList()
     },
     // 导出
-    handleExport () {
-      console.log('导出')
-    },
+    // handleExport () {
+    //   console.log('导出')
+    // },
     // 新增
     handleAdd () {
+      const formData = this.formData
+      Object.keys(formData).forEach(i => {
+        formData[i] = ''
+      })
+      if (formData.companyId) {
+        delete formData.companyId
+      }
+      this.modal.status = 1
       this.modal.title = '新增'
       this.modal.visible = true
     },
     // 编辑
-    handleEdit (params) {
-      console.log('编辑', params)
+    handleEdit (rows) {
+      const formData = this.formData
+      const row = rows.row
+      Object.keys(formData).forEach(i => {
+        Object.keys(row).forEach(j => {
+          if (i === j) {
+            formData[i] = row[j]
+          }
+        })
+      })
+      formData.companyId = rows.row.companyId
+      this.formData = formData
+      this.modal.status = 2
       this.modal.title = '编辑'
       this.modal.visible = true
     },
-    handleOk () {
-      console.log('确定')
+    // 确认添加按钮
+    addClick () {
+      const modal = this.$refs.form
+      modal.$refs['form'].validate((valid) => {
+        if (valid) {
+          this.modal.confirmLoading = true
+          const formData = this.formData
+          const params = new FormData()
+          Object.keys(formData).forEach((key) => {
+            params.append(key, formData[key])
+          })
+          addCustorm(params).then(res => {
+            this.modal.confirmLoading = false
+            this.modal.visible = false
+            if (res.data.code === 0) {
+              this.$Message.success('提交成功!')
+              this.loadList()
+            } else {
+              this.$Message.error(res.data.msg)
+            }
+          })
+        }
+      })
     },
+    // 确认修改按钮
+    editClick () {
+      const modal = this.$refs.form
+      modal.$refs['form'].validate((valid) => {
+        if (valid) {
+          this.modal.confirmLoading = true
+          const formData = this.formData
+          const params = new FormData()
+          Object.keys(formData).forEach((key) => {
+            params.append(key, formData[key])
+          })
+          editCustorm(params).then(res => {
+            this.modal.confirmLoading = false
+            this.modal.visible = false
+            if (res.data.code === 0) {
+              this.$Message.success('提交成功!')
+              this.loadList()
+            } else {
+              this.$Message.error(res.data.msg)
+            }
+          })
+        }
+      })
+    },
+    // 取消按钮
     handleCancel () {
       this.modal.visible = false
     },
     // 详情
-    handleDetail (params) {
-      console.log('详情', params)
+    handleDetail (rows) {
+      const formData = this.formData
+      const row = rows.row
+      Object.keys(formData).forEach(i => {
+        Object.keys(row).forEach(j => {
+          if (i === j) {
+            formData[i] = row[j]
+          }
+        })
+      })
+      this.modal.status = 3
+      this.modal.title = '详情'
+      this.modal.visible = true
     },
-    selection (list) {
+    // 全选
+    selection (ids) {
       const id_list = []
-      list.forEach(i => {
+      ids.forEach(i => {
         id_list.push(i.companyId)
       })
       this.ids = id_list
@@ -227,12 +352,33 @@ export default {
     // 删除
     handleDel (params) {
       let ids = ''
+      let content = ''
       if (params.row) {
         ids = params.row.companyId
+        content = '是否删除该公司？'
       } else {
         ids = this.ids.join(',')
+        content = '是否删除选中的公司？'
       }
-      console.log('删除id', ids)
+      const idList = new FormData()
+      idList.append('ids', ids)
+      this.$Modal.confirm({
+        title: '提示',
+        content: content,
+        onOk: () => {
+          this.$Message.loading('正在删除...', 0)
+          removeCustorm(idList).then(res => {
+            this.$Message.destroy()
+            if (res.data.code === 0) {
+              this.$Message.success('删除成功！')
+              this.loadList()
+            } else {
+              this.$Message.error(res.data.msg)
+            }
+          })
+        },
+        onCancel: () => {}
+      })
     }
   }
 }

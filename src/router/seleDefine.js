@@ -15,10 +15,17 @@ const seleDefine = [
         path: 'index',
         name: '客户列表',
         meta: {
-          icon: 'logo-buffer',
           title: '客户列表'
         },
         component: () => import('@/view/customer/index.vue')
+      },
+      {
+        path: 'echarts',
+        name: '数据统计',
+        meta: {
+          title: '数据统计'
+        },
+        component: () => import('@/view/customer/echarts.vue')
       }
     ]
   },
