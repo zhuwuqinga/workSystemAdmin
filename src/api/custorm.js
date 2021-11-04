@@ -1,5 +1,6 @@
 import axios from '@/libs/api.request'
 
+// 加载客户列表
 export const getCustormList = (data) => {
   return axios.request({
     url: '/system/company/list',
@@ -8,6 +9,7 @@ export const getCustormList = (data) => {
   })
 }
 
+// 新增客户
 export const addCustorm = (data) => {
   return axios.request({
     url: '/system/company/add',
@@ -17,6 +19,7 @@ export const addCustorm = (data) => {
   })
 }
 
+// 修改客户
 export const editCustorm = (data) => {
   return axios.request({
     url: '/system/company/edit',
@@ -26,6 +29,7 @@ export const editCustorm = (data) => {
   })
 }
 
+// 删除客户
 export const removeCustorm = (data) => {
   return axios.request({
     url: '/system/company/remove',
@@ -35,6 +39,7 @@ export const removeCustorm = (data) => {
   })
 }
 
+// 社保规列表
 export const getSocialRuleList = (data) => {
   return axios.request({
     url: '/system/company/getSocialRuleList',
@@ -44,9 +49,28 @@ export const getSocialRuleList = (data) => {
   })
 }
 
+// 公积金列表
 export const getPublicFundRuleList = (data) => {
   return axios.request({
     url: '/system/company/getPublicFundRuleList',
+    method: 'POST',
+    data: data,
+    dataType: 'JSON'
+  })
+}
+
+// 行业列表
+export const getStationList = () => {
+  return axios.request({
+    url: '/order/stationTemp/list',
+    method: 'POST'
+  })
+}
+
+// 销售列表
+export const getSaleManList = (data) => {
+  return axios.request({
+    url: '/system/admin/saleList',
     method: 'POST',
     data: data,
     dataType: 'JSON'

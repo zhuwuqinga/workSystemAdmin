@@ -188,12 +188,12 @@ export default {
         billBankno: '', // 对公帐号
         billBankaddr: '', // 开户行
         mobile: '', // 联系电话
-        saleNames: '' // 销售人员
+        saleId: '' // 销售人员
       },
       companyId: ''
     }
   },
-  mounted () {
+  created () {
     this.loadList()
     this.loadAllList()
   },
@@ -209,8 +209,12 @@ export default {
       getCustormList(params).then(res => {
         this.$Message.destroy()
         if (res.data.code === 0) {
+          let list = res.data.rows
+          list.map(i => {
+            i.saleId = Number(i.saleId)
+          })
           this.total = res.data.total
-          this.tableData = res.data.rows
+          this.tableData = list
         } else {
           this.$Message.error(res.data.msg)
         }

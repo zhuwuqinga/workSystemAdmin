@@ -118,7 +118,7 @@
         <Col span="12">
           <Form-item label="所属行业" prop="industry">
             <Select v-model="formData.industry" :disabled="status === 3" placeholder="请选择所属行业">
-              <Option v-for="(item, index) in industryList" :value="item.value" :key="index">{{ item.label }}</Option>
+              <Option v-for="(item, index) in industryList" :value="item.stationTempId" :key="index">{{ item.industryName }}</Option>
             </Select>
           </Form-item>
         </Col>
@@ -142,8 +142,10 @@
           </Form-item>
         </Col>
         <Col span="12">
-          <Form-item label="销售人员" prop="saleNames">
-            <Input v-model="formData.saleNames" :disabled="status === 3" placeholder="请输入销售人员"></Input>
+          <Form-item label="销售人员" prop="saleId">
+            <Select v-model="formData.saleId" :disabled="status === 3" placeholder="请选择销售人员">
+              <Option v-for="(item, index) in saleManList" :value="item.userId" :key="index">{{ item.realName }}</Option>
+            </Select>
           </Form-item>
         </Col>
       </Row>
@@ -152,7 +154,7 @@
 </template>
 <script>
 import { province, loadCity, loadArea } from '@/assets/js/area.js'
-import { getSocialRuleList, getPublicFundRuleList } from '@/api/custorm.js'
+import { getSocialRuleList, getPublicFundRuleList, getStationList, getSaleManList } from '@/api/custorm.js'
 
 export default {
   name: 'EditForm',
@@ -196,11 +198,11 @@ export default {
         expiryDateType: [{ required: true, message: '请选择有效期限', trigger: 'change', type: 'number' }],
         expiryDate: [{ required: true, message: '请选择有效期限时间', trigger: 'blur' }],
         netpNo: [{ required: true, message: '请输入社会信用代码', trigger: 'blur' }],
-        industry: [{ required: true, message: '请选择所属行业', trigger: 'change' }],
+        industry: [{ required: true, message: '请选择所属行业', trigger: 'change', type: 'number' }],
         billBankno: [{ required: true, message: '请输入对公帐号', trigger: 'blur' }],
         billBankaddr: [{ required: true, message: '请输入开户行', trigger: 'blur' }],
         mobile: [{ required: true, message: '请输入联系电话', trigger: 'blur' }],
-        saleNames: [{ required: true, message: '请输入销售人员', trigger: 'blur' }]
+        saleId: [{ required: true, message: '请输入销售人员', trigger: 'change', type: 'number' }]
       },
       companyTypeList: [{ value: '1', label: '集团总公司' }, { value: '2', label: '集团分公司' }, { value: '3', label: '有限公司' }],
       provinceList: province,
@@ -213,10 +215,12 @@ export default {
       publicAreaList: [],
       publicFundNOList: [],
       expiryDateTypeList: [{ value: 1, label: '非长期' }, { value: 2, label: '长期' }],
-      industryList: [{ value: '1', label: '行业1' }, { value: '2', label: '行业2' }]
+      industryList: [],
+      saleManList: []
     }
   },
   created () {
+    this.$Message.loading('正在加载中...', 0)
     if (this.status !== 1) {
       this.changeProvince(this.formData.province)
       this.changeCity(this.formData.city)
@@ -227,6 +231,9 @@ export default {
       this.changePublicCity(this.formData.city2)
       this.getPublicFundRuleList(this.formData.area2)
     }
+    Promise.all([this.getStationList(), this.getSaleManList()]).then(() => {
+      this.$Message.destroy()
+    })
   },
   methods: {
     // 公司地址省市区 -- START
@@ -282,6 +289,22 @@ export default {
       })
     },
     // 公积金规则省市区 -- END
+    // 行业列表
+    getStationList () {
+      getStationList().then(res => {
+        if (res.data.code === 0) {
+          this.industryList = res.data.rows
+        }
+      })
+    },
+    // 销售员列表
+    getSaleManList () {
+      getSaleManList({ companyId: 0, roleId: 18 }).then(res => {
+        if (res.data.code === 0) {
+          this.saleManList = res.data.data
+        }
+      })
+    },
     // 选择有效期限时间
     choiceDate (e) {
       this.formData.expiryDate = e

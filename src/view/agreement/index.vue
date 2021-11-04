@@ -42,14 +42,14 @@
     </div>
     <div class="mt10">
       <Card>
-        <Table border :columns="columns" :data="data"></Table>
+        <Table border :columns="columns" :data="tableData"></Table>
         <Page
           show-sizer
           show-elevator
           show-total
-          :total="page.total"
-          :current="page.pageNum"
-          :page-size="page.pageSize"
+          :total="total"
+          :current="searchParam.pageNum"
+          :page-size="searchParam.pageSize"
           @on-change="handlePageNumChange"
           @on-page-size-change="handlePageSizeChange"
         ></Page>
@@ -70,6 +70,7 @@
 <script>
 import excel from '@/libs/excel'
 import AddAgreeForm from './modules/AddAgreeForm'
+import { getAgreementList } from '@/api/agreeMent.js'
 
 export default {
   name: 'Agreement',
@@ -81,16 +82,15 @@ export default {
       visible: false,
       title: '新增协议',
       exportLoading: false,
-      page: {
-        total: 100,
-        pageNum: 1,
-        pageSize: 10
-      },
       searchParam: {
+        isAsc: 'asc',
+        pageNum: 1,
+        pageSize: 10,
         status: '',
         company: '',
         name: ''
       },
+      total: 0,
       columns: [
         {
           title: '序号',
@@ -108,27 +108,28 @@ export default {
         }, {
           title: '协议编号',
           align: 'center',
-          key: 'no'
+          width: 180,
+          key: 'agreementNO'
         }, {
           title: '协议名称',
           align: 'center',
-          key: 'name'
+          key: 'agreementName'
         }, {
           title: '签约日期',
           align: 'center',
-          key: 'startDate'
+          key: 'startTime'
         }, {
           title: '截止日期',
           align: 'center',
-          key: 'endDate'
+          key: 'endTime'
         }, {
           title: '签约公司',
           align: 'center',
-          key: 'company'
+          key: 'contractCompany'
         }, {
           title: '经办人',
           align: 'center',
-          key: 'creator'
+          key: 'auditName'
         }, {
           title: '当前版本',
           align: 'center',
@@ -171,78 +172,49 @@ export default {
           }
         }
       ],
-      data: [
-        {
-          status: '审核通过',
-          product: '外包',
-          no: '123456',
-          name: '外包协议',
-          startDate: '2021-01-01',
-          endDate: '2021-08-17',
-          company: '创研',
-          creator: '未知',
-          version: '1.0',
-          type: 0
-        }, {
-          status: '审核通过',
-          product: '外包',
-          no: '123456',
-          name: '外包协议',
-          startDate: '2021-01-01',
-          endDate: '2021-08-17',
-          company: '创研',
-          creator: '未知',
-          version: '1.0',
-          type: 1
-        }, {
-          status: '审核通过',
-          product: '外包',
-          no: '123456',
-          name: '外包协议',
-          startDate: '2021-01-01',
-          endDate: '2021-08-17',
-          company: '创研',
-          creator: '未知',
-          version: '1.0',
-          type: 0
-        }, {
-          status: '审核通过',
-          product: '外包',
-          no: '123456',
-          name: '外包协议',
-          startDate: '2021-01-01',
-          endDate: '2021-08-17',
-          company: '创研',
-          creator: '未知',
-          version: '1.0',
-          type: 1
-        }
-      ]
+      tableData: []
     }
   },
+  created () {
+    this.loadList()
+  },
   methods: {
-    loadData () {
-      console.log(this.page)
-      console.log(this.searchParam)
+    // 加载数据
+    loadList () {
+      const params = new FormData()
+      params.append('isAsc', this.searchParam.isAsc)
+      params.append('status', this.searchParam.status)
+      params.append('company', this.searchParam.company)
+      params.append('name', this.searchParam.name)
+      params.append('pageNum', this.searchParam.pageNum)
+      params.append('pageSize', this.searchParam.pageSize)
+      this.$Message.loading('正在加载中...', 0)
+      getAgreementList(params).then(res => {
+        this.$Message.destroy()
+        if (res.data.code === 0) {
+          this.total = res.data.total
+          this.tableData = res.data.rows
+        } else {
+          this.$Message.error(res.data.msg)
+        }
+      })
     },
     handlePageNumChange (page) {
-      this.page.pageNum = page
-      this.loadData()
+      this.searchParam.pageNum = page
+      this.loadList()
     },
     handlePageSizeChange (size) {
-      this.page.pageSize = size
-      this.loadData()
+      this.searchParam.pageSize = size
+      this.loadList()
     },
     handleSearch () {
-      this.loadData()
+      this.loadList()
     },
     handleReset () {
-      this.searchParam = {
-        status: '',
-        company: '',
-        name: ''
-      }
-      this.loadData()
+      this.searchParam.status = ''
+      this.searchParam.company = ''
+      this.searchParam.name = ''
+      this.loadList()
     },
     handleAdd () {
       this.visible = true
