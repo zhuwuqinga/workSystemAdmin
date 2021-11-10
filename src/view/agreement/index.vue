@@ -5,16 +5,6 @@
         <Form :model="searchParam" :label-width="80">
           <Row>
             <Col span="6">
-              <Form-item label="公司类型">
-                <Select v-model="searchParam.status" placeholder="请选择审核状态">
-                  <Option value="">全部</Option>
-                  <Option value="1">审核通过</Option>
-                  <Option value="2">审核中</Option>
-                  <Option value="3">已驳回</Option>
-                </Select>
-              </Form-item>
-            </Col>
-            <Col span="6">
               <Form-item label="协议名称">
                 <Input type="text" v-model="searchParam.name" placeholder="请输入协议名称" />
               </Form-item>
@@ -98,17 +88,13 @@ export default {
           width: 70,
           align: 'center'
         }, {
-          title: '审核状态',
-          align: 'center',
-          key: 'status'
-        }, {
           title: '关联产品',
           align: 'center',
           key: 'product'
         }, {
           title: '协议编号',
           align: 'center',
-          width: 180,
+          width: 200,
           key: 'agreementNO'
         }, {
           title: '协议名称',
@@ -125,7 +111,7 @@ export default {
         }, {
           title: '签约公司',
           align: 'center',
-          key: 'contractCompany'
+          key: 'companyName'
         }, {
           title: '经办人',
           align: 'center',
@@ -159,7 +145,7 @@ export default {
                     this.handleDelete(params)
                   }
                 }
-              }, params.row.type === 0 ? '停用' : '取消审批'),
+              }, params.row.dataStatus === 0 ? '启用' : '禁用'),
               h('Button', {
                 class: 'ml10 ivu-btn-success',
                 on: {
