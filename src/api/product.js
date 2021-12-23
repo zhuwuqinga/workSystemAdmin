@@ -8,3 +8,12 @@ export const getProductList = (data) => {
     data: data
   })
 }
+
+// 自动生成产品编号
+export const createNO = (params) => {
+  return axios.request({
+    url: '/system/product/createNO',
+    method: 'GET',
+    params: params
+  })
+}

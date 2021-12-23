@@ -14,7 +14,7 @@ const base = [
   {
     path: '/',
     name: '首页',
-    redirect: '/home',
+    redirect: '/',
     component: Main,
     meta: {
       icon: 'md-home',
@@ -22,7 +22,7 @@ const base = [
     },
     children: [
       {
-        path: '/home',
+        path: '/',
         name: 'home',
         meta: {
           title: '首页',

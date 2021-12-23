@@ -43,7 +43,7 @@
               <Button v-else type="primary" :loading="modal.confirmLoading" @click="editClick">确定</Button>
             </span>
           </div>
-          <EditForm ref='form' :parentCompanyList="parentCompanyList" :formData="formData" :status="modal.status"/>
+          <EditForm ref='form' :parentCompanyList="parentCompanyList" :formData="formData" :moadl_status="modal.status"/>
         </Modal>
       </div>
     </div>
@@ -135,14 +135,7 @@ export default {
           render: (h, params) => {
             return h('div', [
               h('Button', {
-                on: {
-                  click: () => {
-                    this.handleEdit(params)
-                  }
-                }
-              }, '编辑'),
-              h('Button', {
-                class: 'ml5',
+                class: 'ivu-btn-success',
                 on: {
                   click: () => {
                     this.handleDetail(params)
@@ -150,7 +143,15 @@ export default {
                 }
               }, '详情'),
               h('Button', {
-                class: 'ml5',
+                class: 'ml5 ivu-btn-primary',
+                on: {
+                  click: () => {
+                    this.handleEdit(params)
+                  }
+                }
+              }, '编辑'),
+              h('Button', {
+                class: 'ml5 ivu-btn-error',
                 on: {
                   click: () => {
                     this.handleDel(params)
@@ -257,6 +258,7 @@ export default {
       if (formData.companyId) {
         delete formData.companyId
       }
+      this.formData = formData
       this.modal.status = 1
       this.modal.title = '新增'
       this.modal.visible = true
@@ -341,6 +343,7 @@ export default {
           }
         })
       })
+      this.formData = formData
       this.modal.status = 3
       this.modal.title = '详情'
       this.modal.visible = true

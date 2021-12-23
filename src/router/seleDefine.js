@@ -12,7 +12,7 @@ const seleDefine = [
     component: Main,
     children: [
       {
-        path: 'index',
+        path: 'list',
         name: '客户列表',
         meta: {
           title: '客户列表'
@@ -20,7 +20,7 @@ const seleDefine = [
         component: () => import('@/view/customer/index.vue')
       },
       {
-        path: 'echarts',
+        path: 'count',
         name: '数据统计',
         meta: {
           title: '数据统计'
@@ -39,7 +39,7 @@ const seleDefine = [
     component: Main,
     children: [
       {
-        path: 'index',
+        path: 'list',
         name: '协议列表',
         meta: {
           icon: 'logo-buffer',
@@ -68,7 +68,7 @@ const seleDefine = [
     component: Main,
     children: [
       {
-        path: 'index',
+        path: 'list',
         name: '产品列表',
         meta: {
           icon: 'logo-buffer',
@@ -97,7 +97,7 @@ const seleDefine = [
     component: Main,
     children: [
       {
-        path: 'index',
+        path: 'list',
         name: '员工列表',
         meta: {
           icon: 'logo-buffer',
